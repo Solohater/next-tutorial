@@ -1,31 +1,32 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState, Suspense } from "react";
-import styles from "./page.module.css";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import LoginMessage from "@/components/LoginMessage";
+import React, { useEffect, useState, Suspense } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import styles from './page.module.css';
+import LoginMessage from '@/components/LoginMessage';
 
-const Login = () => {
-  const session = useSession();
+function LoginPageContent() {
+  const { status } = useSession();
   const router = useRouter();
-  const params = useSearchParams();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const searchParams = useSearchParams();
+
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    setError(params.get("error") || "");
-    setSuccess(params.get("success") || "");
-  }, [params]);
+    setError(searchParams.get('error') || '');
+    setSuccess(searchParams.get('success') || '');
+  }, [searchParams]);
 
   useEffect(() => {
-    if (session.status === "authenticated") {
-      router.push("/dashboard");
+    if (status === 'authenticated') {
+      router.push('/dashboard');
     }
-  }, [session.status, router]);
+  }, [status, router]);
 
-  if (session.status === "loading") {
+  if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
@@ -34,7 +35,7 @@ const Login = () => {
     const email = e.target[0].value;
     const password = e.target[1].value;
 
-    signIn("credentials", {
+    signIn('credentials', {
       email,
       password,
     });
@@ -42,47 +43,47 @@ const Login = () => {
 
   return (
     <div className={styles.container}>
-      {/* 👇 Wrap everything in one parent */}
-      <div>
-        <Suspense fallback={<p>Loading message...</p>}>
-          <LoginMessage />
-        </Suspense>
+      <LoginMessage />
+      <h1 className={styles.title}>{success || 'Welcome Back'}</h1>
+      <h2 className={styles.subtitle}>Please sign in to see the dashboard.</h2>
 
-        <h1 className={styles.title}>{success ? success : "Welcome Back"}</h1>
-        <h2 className={styles.subtitle}>Please sign in to see the dashboard.</h2>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <input
+          type="text"
+          placeholder="Email"
+          required
+          className={styles.input}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          className={styles.input}
+        />
+        <button className={styles.button}>Login</button>
+        {error && <p className={styles.error}>{error}</p>}
+      </form>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <input
-            type="text"
-            placeholder="Email"
-            required
-            className={styles.input}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            className={styles.input}
-          />
-          <button className={styles.button}>Login</button>
-          {error && <p className={styles.error}>{error}</p>}
-        </form>
+      <button
+        onClick={() => signIn('google')}
+        className={'${styles.button} ${styles.google}'}
+      >
+        Login with Google
+      </button>
 
-        <button
-          onClick={() => signIn("google")}
-          className={`${styles.button} ${styles.google}`}
-        >
-          Login with Google
-        </button>
+      <span className={styles.or}>- OR -</span>
 
-        <span className={styles.or}>- OR -</span>
-
-        <Link className={styles.link} href="/dashboard/register">
-          Create new account
-        </Link>
-      </div>
+      <Link className={styles.link} href="/dashboard/register">
+        Create new account
+      </Link>
     </div>
   );
-};
+}
 
-export default Login;
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading login page...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
+}
