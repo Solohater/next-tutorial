@@ -2,7 +2,7 @@ import Post from "@/models/Post"
 import connect from "@/utils/db"
 import { NextResponse } from "next/server"
 
-export const GET = async (request, { params }) => {
+export const GET = async ( { params }) => {
     const { id } = params;
   
     try {
@@ -16,7 +16,7 @@ export const GET = async (request, { params }) => {
     }
   };
   
-  export const DELETE = async (request, { params }) => {
+  export const DELETE = async ( { params }) => {
     const { id } = params;
   
     try {
